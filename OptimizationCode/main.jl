@@ -9,22 +9,26 @@ function df1(x::Array{Float64,2},y::Array{Float64,1})
     return x-y*y';
 end
 
-function f2(x::Array{Float64,2},y::Array{Float64,1})
-    return 0.5*norm(x - y*y',2).^2;
+function f2(x::Array{Float64,2},y::Array{Float64,1},A::Array{Float64,2})
+    return 0.5*norm((x - y*y').*A,2).^2;
 end
 
-function df2(x::Array{Float64,2},y::Array{Float64,1})
-    return x-y*y';
+function df2(x::Array{Float64,2},y::Array{Float64,1},A::Array{Float64,2})
+    return (x-y*y').*A.*A;
 end
 
 N = 20;
 x = zeros(N,N);
 y = rand(N);
+A = rand(N,N)
 
-f = x-> f1(x,y);
-df = x-> df1(x,y);
+#f = x-> f1(x,y);
+#df = x-> df1(x,y);
 
-alpha = 1e-1;
+f = x-> f2(x,y,A);
+df = x-> df2(x,y,A);
+
+alpha = 5e-1;
 eps = 1e-5;
 
 sdHistory = [f(x)];
@@ -92,5 +96,6 @@ fig, ax = subplots()
 ax[:plot](collect(1:length(sdHistory)),sdHistory, "k-", linewidth=2, label="sd", alpha=0.6)
 ax[:plot](collect(1:length(DLRHistory)),DLRHistory, "r--", linewidth=2, label="DLR", alpha=0.6)
 ax[:legend](loc="upper right")
+ax.set_yscale("log")
 ax.tick_params("both",labelsize=20) 
 show()
